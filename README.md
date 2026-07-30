@@ -28,10 +28,17 @@ This project is structured as a monorepo containing a **Next.js** frontend and a
 ### 1. Unified Monorepo structure
 Separation of concerns is maintained by using Next.js on the client and NestJS on the server. This allows frontend and backend components to scale independently and be deployed to separate hosts if necessary, while keeping development files unified.
 
-### 2. Atomic Database Transactions (`$transaction`)
+### 2. Database Selection & Rationale
+We selected **PostgreSQL hosted on Supabase** as the primary database solution:
+- **ACID Compliance:** Inventory reservation and sales require strict consistency. Storing product stock and reservation data in a system that guarantees ACID properties ensures that data remains accurate under concurrent updates.
+- **Relational Integrity:** Using foreign keys to link `Reservation` records to `Product` records prevents orphaned data and allows cascading updates or joins.
+- **Row-level Locks & Transaction Blocks:** Postgres supports robust transaction isolation levels that allow us to guarantee atomic stock updates.
+- **Managed Hosting via Supabase:** Supabase provides fully managed PostgreSQL with built-in connection pooling (via PgBouncer/Supavisor). This pooler is critical for scaling database connections and managing concurrent transactions safely without hitting connection limit errors.
+
+### 3. Atomic Database Transactions (`$transaction`)
 To prevent race conditions—such as two users reserving the last item at the exact same millisecond—we utilize **Prisma Transactions**. The check for available stock, the deduction of stock, and the creation of the reservation entry are executed as a single, atomic unit of work. If any step fails, the entire transaction is rolled back.
 
-### 3. Persisted TTL with Cron Job Polling
+### 4. Persisted TTL with Cron Job Polling
 Rather than keeping reservation timers solely in memory (which would fail if the server restarts) or setting up complex message queues, reservation expirations are saved directly to the database. A lightweight Cron job (`@nestjs/schedule`) polls the database every 10 seconds for pending reservations whose `expiresAt` is in the past, and returns the stock back to the inventory in a safe transaction block.
 
 ---

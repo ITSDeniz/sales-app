@@ -17,6 +17,8 @@ interface ActiveReservation {
   expiresAt: string;
 }
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+
 export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -26,7 +28,7 @@ export default function Home() {
   // 1. Fetch Products from Backend
   const fetchProducts = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/products');
+      const response = await axios.get(`${API_BASE_URL}/products`);
       setProducts(response.data);
     } catch (error) {
       console.error('Error fetching products:', error);
@@ -68,7 +70,7 @@ export default function Home() {
   // 3. When Reserve Button is Clicked
   const handleReserve = async (productId: string) => {
     try {
-      const response = await axios.post('http://localhost:3000/reservations', {
+      const response = await axios.post(`${API_BASE_URL}/reservations`, {
         productId,
         quantity: 1,
       });
@@ -85,7 +87,7 @@ export default function Home() {
     if (!activeReservation) return;
 
     try {
-      await axios.patch(`http://localhost:3000/reservations/${activeReservation.id}/complete`);
+      await axios.patch(`${API_BASE_URL}/reservations/${activeReservation.id}/complete`);
       alert('Payment completed successfully! The product is yours.');
       setActiveReservation(null);
       fetchProducts();
