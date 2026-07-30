@@ -37,10 +37,10 @@ export class ReservationsService {
             });
 
             // 3. Set a 5-minute expiration date (+5 minutes)
-            // const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
+            const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
 
             // 3. Set a 15-second expiration date for testing (+15 seconds)
-            const expiresAt = new Date(Date.now() + 15 * 1000);
+            // const expiresAt = new Date(Date.now() + 15 * 1000);
 
             // 4. Create the reservation
             const reservation = await tx.reservation.create({
