@@ -56,6 +56,64 @@ export class ReservationsService {
         });
     }
 
+    // 1. Complete Payment (Finalize the Sale)
+    async complete(id: string) {
+        const reservation = await this.prisma.reservation.findUnique({
+            where: { id },
+        });
+
+        if (!reservation) {
+            throw new NotFoundException(`Reservation with ID ${id} not found`);
+        }
+
+        if (reservation.status !== ReservationStatus.PENDING) {
+            throw new BadRequestException(
+                `Reservation is already ${reservation.status.toLowerCase()}`,
+            );
+        }
+
+        // Set status to COMPLETED (Stock was already deducted during creation)
+        return this.prisma.reservation.update({
+            where: { id },
+            data: { status: ReservationStatus.COMPLETED },
+        });
+    }
+
+    // 2. User Cancels Reservation (Immediate Stock Refund)
+    async cancel(id: string) {
+        const reservation = await this.prisma.reservation.findUnique({
+            where: { id },
+        });
+
+        if (!reservation) {
+            throw new NotFoundException(`Reservation with ID ${id} not found`);
+        }
+
+        if (reservation.status !== ReservationStatus.PENDING) {
+            throw new BadRequestException(
+                `Cannot cancel reservation with status ${reservation.status}`,
+            );
+        }
+
+        // Revert stock and update status to EXPIRED immediately using a transaction
+        return this.prisma.$transaction(async (tx) => {
+            await tx.product.update({
+                where: { id: reservation.productId },
+                data: {
+                    availableStock: {
+                        increment: reservation.quantity,
+                    },
+                },
+            });
+
+            return tx.reservation.update({
+                where: { id },
+                data: { status: ReservationStatus.EXPIRED },
+            });
+        });
+    }
+
+
     // Cron job that runs every 10 seconds
     @Cron('*/10 * * * * *')
     async handleExpiredReservations() {
