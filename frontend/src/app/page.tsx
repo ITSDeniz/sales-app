@@ -17,7 +17,7 @@ interface ActiveReservation {
   expiresAt: string;
 }
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://sales-app-k2oy.onrender.com';
 
 export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -161,8 +161,8 @@ export default function Home() {
                   disabled={product.availableStock <= 0 || activeReservation !== null}
                   onClick={() => handleReserve(product.id)}
                   className={`w-full py-3 rounded-lg font-medium transition ${product.availableStock <= 0 || activeReservation !== null
-                      ? 'bg-slate-700 text-slate-500 cursor-not-allowed'
-                      : 'bg-indigo-600 hover:bg-indigo-500 text-white'
+                    ? 'bg-slate-700 text-slate-500 cursor-not-allowed'
+                    : 'bg-indigo-600 hover:bg-indigo-500 text-white'
                     }`}
                 >
                   {activeReservation !== null
