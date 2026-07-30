@@ -6,6 +6,13 @@ This project is structured as a monorepo containing a **Next.js** frontend and a
 
 ---
 
+## Live Deployments
+
+- **Frontend (Next.js):** [https://sales-app-ten-beige.vercel.app](https://sales-app-ten-beige.vercel.app)
+- **Backend (NestJS):** [https://sales-app-k2oy.onrender.com](https://sales-app-k2oy.onrender.com)
+
+---
+
 ## Repository Structure
 
 - `frontend/`: Next.js web application styled with TailwindCSS.
